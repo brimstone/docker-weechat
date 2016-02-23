@@ -24,4 +24,6 @@ while pgrep sshd; do
 	sleep 1
 done
 
+[ -d /var/run/sshd ] || mkdir /var/run/sshd
+
 exec /usr/sbin/sshd -D
