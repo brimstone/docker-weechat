@@ -1,4 +1,4 @@
 #!/bin/bash
 
-[ $# = 0 ] && exec runit /service
+[ $# = 0 ] && exec runsvdir /service
 exec /init "$@"
