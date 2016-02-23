@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -euo pipefail
+
+if [ ! -e /etc/ssh/ssh_host_rsa_key ]; then
+	dpkg-reconfigure openssh-server
+	killall sshd
+fi
+
+cd /home
+for u in *; do
+	S="/bin/bash"
+	[ -e "$u/.zshrc" -a -n "$(which zsh)" ] && S=$(which zsh)
+	groupadd --gid "$(stat --format %g "$u")" "$u" || continue
+	useradd	--uid "$(stat --format %u "$u")" \
+			--gid "$(stat --format %g "$u")" \
+			--groups sudo \
+			--shell "$S" "$u"
+done
+
+while pgrep sshd; do
+	ps faux
+	echo "Waiting..."
+	sleep 1
+done
+
+/usr/sbin/bitlbee -i 127.0.0.1 -p 6667 -P /var/run/bitlbee.pid -F
+exec /usr/sbin/sshd -D
