@@ -1,3 +1,20 @@
+FROM brimstone/debian:sid as discord
+
+RUN package build-essential git autoconf gettext libtool bitlbee-dev \
+            pkg-config libglib2.0-dev
+
+RUN git clone https://github.com/sm00th/bitlbee-discord /discord
+
+WORKDIR /discord
+
+RUN ./autogen.sh
+
+RUN ./configure
+
+RUN make install
+
+RUN find /usr -iname '*discord*' -ls
+
 FROM brimstone/debian:sid
 
 ENTRYPOINT ["/loader"]
@@ -15,6 +32,8 @@ RUN package weechat-curses vim rsync libwww-perl \
     && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
     && echo "LANG=\"en_US.UTF-8\"" > /etc/default/locale \
     && /usr/sbin/locale-gen en_US.UTF-8
+
+COPY --from=discord /usr/lib/bitlbee/discord.* /usr/lib/bitlbee/
 
 COPY init /init
 
